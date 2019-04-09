@@ -9,10 +9,10 @@ ssh-keyscan 0.0.0.0 >> /root/.ssh/known_hosts
 #$HADOOP_HOME/sbin/start-dfs.sh
 $HADOOP_HOME/sbin/start-all.sh
 
-$HADOOP_HOME/bin/hdfs dfs -mkdir /tmp
-$HADOOP_HOME/bin/hdfs dfs -chmod 777 /tmp
-$HADOOP_HOME/bin/hadoop fs -mkdir -p /user/hive/warehouse
-$HADOOP_HOME/bin/hadoop fs -chmod g+w /user/hive/warehouse
+# $HADOOP_HOME/bin/hdfs dfs -mkdir /tmp
+# $HADOOP_HOME/bin/hdfs dfs -chmod 777 /tmp
+# $HADOOP_HOME/bin/hadoop fs -mkdir -p /user/hive/warehouse
+# $HADOOP_HOME/bin/hadoop fs -chmod g+w /user/hive/warehouse
 
 # start hive
 cd $HIVE_HOME && bin/hiveserver2 > /dev/null 2>&1 &

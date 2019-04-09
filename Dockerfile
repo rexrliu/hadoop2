@@ -24,6 +24,23 @@ ENV PATH $HADOOP_HOME/bin:$HADOOP_INSTALL/sbin:$HIVE_HOME/bin:$SPARK_HOME/bin:$P
 ENV CLASSPATH $HADOOP_HOME/lib/*:HIVE_HOME/lib/*:.
 
 ################################################################################
+# add env for all users
+RUN echo "JAVA_HOME=$JAVA_HOME" >> /etc/environment
+RUN echo "HADOOP_HEAPSIZE=HADOOP_HEAPSIZE" >> /etc/environment
+RUN echo "HADOOP_HOME=$HADOOP_HOME" >> /etc/environment
+RUN echo "HADOOP_INSTALL=$HADOOP_INSTALL" >> /etc/environment
+RUN echo "HADOOP_MAPRED_HOME=$HADOOP_MAPRED_HOME" >> /etc/environment
+RUN echo "HADOOP_COMMON_HOME=$HADOOP_COMMON_HOME" >> /etc/environment
+RUN echo "HADOOP_HDFS_HOME=$HADOOP_HDFS_HOME" >> /etc/environment
+RUN echo "HADOOP_CONF_DIR=$HADOOP_CONF_DIR" >> /etc/environment
+RUN echo "YARN_HOME=$YARN_HOME" >> /etc/environment
+RUN echo "HIVE_HOME=$HIVE_HOME" >> /etc/environment
+RUN echo "SPARK_HOME=$SPARK_HOME" >> /etc/environment
+RUN echo "HUE_HOME=$HUE_HOME" >> /etc/environment
+RUN echo "PATH=$PATH" >> /etc/environment
+RUN echo "CLASSPATH=$CLASSPATH" >> /etc/environment
+
+################################################################################
 # install hadoop
 RUN mkdir $HADOOP_HOME
 RUN curl -s http://archive.apache.org/dist/hadoop/core/hadoop-2.7.2/hadoop-2.7.2.tar.gz | tar -xz -C $HADOOP_HOME --strip-components 1
@@ -100,6 +117,23 @@ EXPOSE 8888
 
 # SSH
 EXPOSE 22
+
+################################################################################
+# add users and groups
+RUN useradd -m hdpu && echo "hdpu:hdpu123" | chpasswd && adduser hdpu sudo
+
+TODO: add privileged groups including hdfs, hadoop, hive, hue, mapred, spark
+Add the user hdpu to all these groups
+create hdfs path for hdpu
+set proper permission on hdfs (include /user/hdpu, /user/hive/)
+
+
+$HADOOP_HOME/bin/hdfs dfs -mkdir /tmp
+$HADOOP_HOME/bin/hdfs dfs -chmod 1777 /tmp
+$HADOOP_HOME/bin/hadoop fs -mkdir -p /user/hive/warehouse
+$HADOOP_HOME/bin/hadoop fs -chmod g+w /user/hive/warehouse
+
+
 
 ################################################################################
 # create startup script
