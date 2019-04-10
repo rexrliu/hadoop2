@@ -1,12 +1,11 @@
 #!/bin/bash
 
-# start hadoop
+# start ssh
 service ssh start
 ssh-keyscan localhost > /root/.ssh/known_hosts
-# ssh-keyscan ::1 >> /root/.ssh/known_hosts && \
 ssh-keyscan 0.0.0.0 >> /root/.ssh/known_hosts
-#$HADOOP_HOME/sbin/start-yarn.sh
-#$HADOOP_HOME/sbin/start-dfs.sh
+
+# start hadoop
 $HADOOP_HOME/sbin/start-all.sh
 
 $HADOOP_HOME/bin/hdfs dfs -mkdir /tmp
@@ -18,7 +17,7 @@ $HADOOP_HOME/bin/hdfs dfs -mkdir -p /user/hdpu
 $HADOOP_HOME/bin/hdfs dfs -chown -R hdpu:hdfs /user/hdpu
 $HADOOP_HOME/bin/hdfs dfs -chmod 755 /user/hdpu
 
-# start mysql for hue and hive
+# start mysql and create databases/users for hue and hive
 chown -R mysql:mysql /var/lib/mysql
 usermod -d /var/lib/mysql/ mysql
 service mysql start
@@ -47,5 +46,5 @@ $HUE_HOME/build/env/bin/hue syncdb --noinput
 $HUE_HOME/build/env/bin/hue migrate
 $HUE_HOME/build/env/bin/supervisor > /dev/null 2>&1 &
 
-cd /
-/bin/bash
+# persist the container
+tail -f /dev/null
