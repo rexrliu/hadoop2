@@ -76,7 +76,7 @@ RUN $HADOOP_HOME/bin/hdfs namenode -format -nonInteractive
 
 ################################################################################
 # Derby for Hive metastore backend
-RUN cd $HIVE_HOME && $HIVE_HOME/bin/schematool -initSchema -dbType derby
+#RUN cd $HIVE_HOME && $HIVE_HOME/bin/schematool -initSchema -dbType derby
 
 ################################################################################
 # install MySQL for Hue
@@ -89,6 +89,11 @@ RUN chown -R mysql:mysql /var/lib/mysql
 RUN usermod -d /var/lib/mysql/ mysql
 
 ADD x-hui.ini /usr/share/hue/desktop/conf
+
+RUN wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.15.tar.gz
+RUN tar -xzf mysql-connector-java-8.0.15.tar.gz
+RUN cp mysql-connector-java-8.0.15/mysql-connector-java-8.0.15.jar $HIVE_HOME/lib
+RUN rm -rf mysql-connector-java-8.0.15*
 
 ################################################################################
 # install spark
@@ -120,20 +125,16 @@ EXPOSE 22
 
 ################################################################################
 # add users and groups
-RUN useradd -m hdpu && echo "hdpu:hdpu123" | chpasswd && adduser hdpu sudo
+RUN groupadd hdfs && groupadd hadoop && groupadd hive && groupadd mapred && groupadd spark
 
-TODO: add privileged groups including hdfs, hadoop, hive, hue, mapred, spark
-Add the user hdpu to all these groups
-create hdfs path for hdpu
-set proper permission on hdfs (include /user/hdpu, /user/hive/)
+RUN useradd -g hadoop hdpu && echo "hdpu:hdpu123" | chpasswd && adduser hdpu sudo
 
-
-$HADOOP_HOME/bin/hdfs dfs -mkdir /tmp
-$HADOOP_HOME/bin/hdfs dfs -chmod 1777 /tmp
-$HADOOP_HOME/bin/hadoop fs -mkdir -p /user/hive/warehouse
-$HADOOP_HOME/bin/hadoop fs -chmod g+w /user/hive/warehouse
-
-
+RUN usermod -a -G hdfs hdpu
+RUN usermod -a -G hadoop hdpu
+RUN usermod -a -G hive hdpu
+RUN usermod -a -G mapred hdpu
+RUN usermod -a -G spark hdpu
+RUN usermod -a -G hue hdpu
 
 ################################################################################
 # create startup script
