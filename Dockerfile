@@ -21,7 +21,7 @@ ENV HIVE_HOME=/usr/local/hive
 ENV SPARK_HOME=/usr/local/spark
 ENV HUE_HOME=/usr/share/hue
 
-ENV PATH=$HADOOP_HOME/bin:$HADOOP_INSTALL/sbin:$HIVE_HOME/bin:$SPARK_HOME/bin:$PATH
+ENV PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_INSTALL/sbin:$HIVE_HOME/bin:$SPARK_HOME/bin:$PATH
 ENV CLASSPATH=$HADOOP_HOME/lib/*:HIVE_HOME/lib/*:.
 
 ################################################################################
@@ -99,6 +99,25 @@ RUN curl -s http://www.gtlib.gatech.edu/pub/apache/spark/spark-2.3.3/spark-2.3.3
 RUN mv /usr/local/spark-2.3.3-bin-hadoop2.7 $SPARK_HOME
 
 ################################################################################
+# add users and groups
+RUN groupadd hdfs && groupadd hadoop && groupadd hive && groupadd mapred && groupadd spark
+RUN useradd -g hadoop hdpu && echo "hdpu:hdpu123" | chpasswd && adduser hdpu sudo
+
+RUN usermod -a -G hdfs hdpu
+RUN usermod -a -G hadoop hdpu
+RUN usermod -a -G hive hdpu
+RUN usermod -a -G mapred hdpu
+RUN usermod -a -G spark hdpu
+RUN usermod -a -G hue hdpu
+
+RUN mkdir /home/hdpu
+RUN chown -R hdpu:hadoop /home/hdpu
+RUN echo "/bin/bash\n~/.bashrc" > /home/hdpu/.profile
+ADD bashrc /home/hdpu/.bashrc
+# RUN mv /home/hdpu/bashrc /home/hdpu/.bashrc
+RUN chown hdpu:hadoop /home/hdpu/.bashrc /home/hdpu/.profile
+
+################################################################################
 # expose port
 # Hadoop Resource Manager
 EXPOSE 8088
@@ -120,18 +139,6 @@ EXPOSE 8888
 
 # SSH
 EXPOSE 22
-
-################################################################################
-# add users and groups
-RUN groupadd hdfs && groupadd hadoop && groupadd hive && groupadd mapred && groupadd spark
-RUN useradd -g hadoop hdpu && echo "hdpu:hdpu123" | chpasswd && adduser hdpu sudo
-
-RUN usermod -a -G hdfs hdpu
-RUN usermod -a -G hadoop hdpu
-RUN usermod -a -G hive hdpu
-RUN usermod -a -G mapred hdpu
-RUN usermod -a -G spark hdpu
-RUN usermod -a -G hue hdpu
 
 ################################################################################
 # create startup script and set ENTRYPOINT
