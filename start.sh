@@ -42,9 +42,7 @@ $HIVE_HOME/bin/hive --service hiveserver2 > /dev/null 2>&1 &
 $HIVE_HOME/bin/hive --service metastore > /dev/null 2>&1 &
 
 # start hue
-$HUE_HOME/build/env/bin/hue syncdb --noinput
-$HUE_HOME/build/env/bin/hue migrate
-$HUE_HOME/build/env/bin/supervisor > /dev/null 2>&1 &
+$HUE_HOME/build/env/bin/hue runserver 0.0.0.0:8888 > /dev/null 2>&1 &
 
 # persist the container
 tail -f /dev/null
