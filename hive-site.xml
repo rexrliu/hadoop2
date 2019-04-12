@@ -17,8 +17,6 @@
     <description>Max memory for Map Reduce Jobs</description>
   </property>
 
-
-
   <property>
     <name>javax.jdo.option.ConnectionURL</name>
     <value>jdbc:mysql://localhost/metastore_db?createDatabaseIfNotExist=true</value>

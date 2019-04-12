@@ -31,7 +31,8 @@ RUN apt-get install --fix-missing -yq \
   software-properties-common \
   vim \
   openssh-server \
-  wget
+  wget \
+  sudo
 
 ################################################################################
 # install MySQL
@@ -75,6 +76,7 @@ ENV HUE_HOME=/usr/local/hue
 
 ENV PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_INSTALL/sbin:$HIVE_HOME/bin:$SPARK_HOME/bin:$PATH
 ENV CLASSPATH=$HADOOP_HOME/lib/*:HIVE_HOME/lib/*:.
+ENV LD_LIBRARY_PATH=$HADOOP_HOME/lib/native
 
 ################################################################################
 # add the above env for all users
@@ -92,6 +94,7 @@ RUN echo "SPARK_HOME=$SPARK_HOME" >> /etc/environment
 RUN echo "HUE_HOME=$HUE_HOME" >> /etc/environment
 RUN echo "PATH=$PATH" >> /etc/environment
 RUN echo "CLASSPATH=$CLASSPATH" >> /etc/environment
+RUN echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> /etc/environment
 
 ################################################################################
 # install hadoop
@@ -125,6 +128,11 @@ ADD hive-site.xml $HIVE_HOME/conf/hive-site.xml
 RUN curl -s http://www.gtlib.gatech.edu/pub/apache/spark/spark-2.3.3/spark-2.3.3-bin-hadoop2.7.tgz | tar -xz -C /usr/local
 RUN mv /usr/local/spark-2.3.3-bin-hadoop2.7 $SPARK_HOME
 
+# config spark to read hive tables
+RUN cp $HADOOP_HOME/etc/hadoop/core-site.xml $SPARK_HOME/conf/
+RUN cp $HADOOP_HOME/etc/hadoop/hdfs-site.xml $SPARK_HOME/conf/
+RUN cp $HIVE_HOME/conf/hive-site.xml $SPARK_HOME/conf/
+
 ################################################################################
 # install hue
 RUN mkdir $HUE_HOME
@@ -139,6 +147,7 @@ ADD pseudo-distributed.ini $HUE_HOME/hue/desktop/conf
 RUN wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.15.tar.gz
 RUN tar -xzf mysql-connector-java-8.0.15.tar.gz
 RUN cp mysql-connector-java-8.0.15/mysql-connector-java-8.0.15.jar $HIVE_HOME/lib
+RUN cp mysql-connector-java-8.0.15/mysql-connector-java-8.0.15.jar $SPARK_HOME/jars/
 RUN rm -rf mysql-connector-java-8.0.15 mysql-connector-java-8.0.15.tar.gz
 
 ################################################################################
