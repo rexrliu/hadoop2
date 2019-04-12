@@ -1,5 +1,5 @@
 # hadoop2
-This Dockerfile allows you to install Hadoop2, Hive2, Spark2, and Hue in one container.
+This Dockerfile is for the installation of Hadoop2, Hive2, Spark2, and Hue4 in one container.
 
 
 Build Image
@@ -12,4 +12,9 @@ docker run --rm -p 8088:8088 -p 50070:50070 -p 50075:50075 -p 10000:10000 -p 100
 
 Login to the server
 =============
-ssh -p 8022 hdpu@localhost (password: hdpu123)
+ssh -p 8022 hdpu@localhost (password: hdpu123, this is a sudo user)
+
+Features
+=============
+Hue file browser and table browser are enabled
+Spark access to Hive tables is configured

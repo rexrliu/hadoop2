@@ -7,7 +7,7 @@ alias ll="ls -l"
 alias la="ls -lGa"
 
 alias hvb="beeline -u jdbc:hive2://localhost:10000/default"
-alias spl="spark-shell --deploy-mode client --master yarn"
+alias spy="spark-shell --deploy-mode client --master yarn"
 
 # Common Hadoop File System Aliases
 alias hf="hadoop fs"                                         # Base Hadoop fs command
