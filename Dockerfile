@@ -140,7 +140,8 @@ RUN curl -L https://www.dropbox.com/s/0rhrlnjmyw6bnfc/hue-4.2.0.tgz?dl=0 | tar -
 WORKDIR $HUE_HOME
 RUN make apps
 
-ADD pseudo-distributed.ini $HUE_HOME/hue/desktop/conf
+RUN rm -f $HUE_HOME/desktop/conf/hue.ini
+ADD hue.ini $HUE_HOME/desktop/conf
 
 ################################################################################
 # add mysql jdbc driver
