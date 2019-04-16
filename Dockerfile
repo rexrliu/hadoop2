@@ -129,9 +129,9 @@ RUN curl -s http://www.gtlib.gatech.edu/pub/apache/spark/spark-2.3.3/spark-2.3.3
 RUN mv /usr/local/spark-2.3.3-bin-hadoop2.7 $SPARK_HOME
 
 # config spark to read hive tables
-RUN cp $HADOOP_HOME/etc/hadoop/core-site.xml $SPARK_HOME/conf/
-RUN cp $HADOOP_HOME/etc/hadoop/hdfs-site.xml $SPARK_HOME/conf/
-RUN cp $HIVE_HOME/conf/hive-site.xml $SPARK_HOME/conf/
+RUN ln -s $HADOOP_HOME/etc/hadoop/core-site.xml $SPARK_HOME/conf/core-site.xml
+RUN ln -s $HADOOP_HOME/etc/hadoop/hdfs-site.xml $SPARK_HOME/conf/hdfs-site.xml
+RUN ln -s $HIVE_HOME/conf/hive-site.xml $SPARK_HOME/conf/hive-site.xml
 
 ################################################################################
 # install hue
