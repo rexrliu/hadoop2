@@ -6,9 +6,9 @@
   </property>
 
   <property>
-     <name>hive.exec.scratchdir</name>
-     <value>/tmp</value>
-     <description>Scratch space for Hive jobs</description>
+    <name>hive.exec.scratchdir</name>
+    <value>/tmp</value>
+    <description>Scratch space for Hive jobs</description>
   </property>
 
   <property>
@@ -38,15 +38,14 @@
   </property>
 
   <property>
-     <name>hive.metastore.warehouse.dir</name>
-     <value>hdfs://localhost:9000/user/hive/warehouse</value>
-     <description>location of default database for the warehouse</description>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>hdfs://localhost:9000/user/hive/warehouse</value>
+    <description>location of default database for the warehouse</description>
   </property>
 
-
   <property>
-     <name>spark.home</name>
-     <value>/usr/local/spark</value>
+    <name>spark.home</name>
+    <value>/usr/local/spark</value>
   </property>
 
   <property>
@@ -66,7 +65,7 @@
 
   <property>
     <name>spark.eventLog.dir</name>
-    <value>hdfs:///tmp/sparkeventlog</value>
+    <value>hdfs://localhost:9000/user/hive/tmp/sparkeventlog</value>
   </property>
 
   <property>
@@ -106,6 +105,6 @@
 
   <property>
     <name>spark.yarn.jars</name>
-    <value>hdfs:///spark-jars/*</value>
+    <value>hdfs://localhost:9000/spark-jars/*</value>
   </property>
 </configuration>
