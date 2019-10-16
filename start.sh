@@ -17,6 +17,9 @@ $HADOOP_HOME/bin/hdfs dfs -mkdir -p /user/hdpu
 $HADOOP_HOME/bin/hdfs dfs -chown -R hdpu:hdfs /user/hdpu
 $HADOOP_HOME/bin/hdfs dfs -chmod 755 /user/hdpu
 
+$HADOOP_HOME/bin/hdfs dfs -mkdir /spark-jars
+$HADOOP_HOME/bin/hdfs put $SPARK_HOME/jars/* /spark-jars
+
 # start mysql and create databases/users for hue and hive
 chown -R mysql:mysql /var/lib/mysql
 usermod -d /var/lib/mysql/ mysql

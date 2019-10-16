@@ -133,6 +133,11 @@ RUN ln -s $HADOOP_HOME/etc/hadoop/core-site.xml $SPARK_HOME/conf/core-site.xml
 RUN ln -s $HADOOP_HOME/etc/hadoop/hdfs-site.xml $SPARK_HOME/conf/hdfs-site.xml
 RUN ln -s $HIVE_HOME/conf/hive-site.xml $SPARK_HOME/conf/hive-site.xml
 
+# config hive on spark
+RUN ln -s $SPARK_HOME/jars/scala-library-*.jar $HIVE_HOME/lib/scala-library.jar
+RUN ln -s $SPARK_HOME/jars/spark-core-*.jar $HIVE_HOME/lib/spark-core.jar
+RUN ln -s $SPARK_HOME/jars/spark-network-common-*.jar $HIVE_HOME/lib/spark-network-common.jar
+
 ################################################################################
 # install hue
 RUN mkdir $HUE_HOME
