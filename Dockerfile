@@ -4,8 +4,7 @@ LABEL maintainer="rexrliu@gmail.com"
 WORKDIR /
 ################################################################################
 # update and install basic tools
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install --fix-missing -yq \
+RUN apt-get update && apt-get upgrade -y && apt-get install --fix-missing -yq \
   git \
   ant \
   gcc \
@@ -32,16 +31,16 @@ RUN apt-get install --fix-missing -yq \
   vim \
   openssh-server \
   wget \
-  sudo
+  sudo \
+  openjdk-8-jdk \
+  unzip
 
 ################################################################################
 # install MySQL
 ENV MYSQL_PWD=Pwd123
 RUN echo "mysql-server mysql-server/root_password password $MYSQL_PWD" | debconf-set-selections
 RUN echo "mysql-server mysql-server/root_password_again password $MYSQL_PWD" | debconf-set-selections
-# RUN apt-get update && apt-get upgrade -y
-RUN apt-get -y install mysql-server
-
+RUN apt-get install -y mysql-server
 RUN chown -R mysql:mysql /var/lib/mysql
 RUN usermod -d /var/lib/mysql/ mysql
 
@@ -51,17 +50,8 @@ RUN mkdir /root/.ssh
 RUN cat /dev/zero | ssh-keygen -q -N "" > /dev/null && cat /root/.ssh/id_rsa.pub > /root/.ssh/authorized_keys
 
 ################################################################################
-# install java
-RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-  add-apt-repository -y ppa:webupd8team/java && \
-  apt-get update && \
-  apt-get install -y oracle-java8-installer && \
-  rm -rf /var/lib/apt/lists/* && \
-  rm -rf /var/cache/oracle-jdk8-installer
-
-################################################################################
 # set environment variables
-ENV JAVA_HOME=/usr/lib/jvm/java-8-oracle
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ENV HADOOP_HEAPSIZE=8192
 ENV HADOOP_HOME=/usr/local/hadoop
 ENV HADOOP_INSTALL=$HADOOP_HOME
@@ -71,8 +61,11 @@ ENV HADOOP_HDFS_HOME=$HADOOP_INSTALL
 ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
 ENV YARN_HOME=$HADOOP_INSTALL
 ENV HIVE_HOME=/usr/local/hive
+ENV TEZ_HOME=/usr/local/tez
+ENV CATALINA_HOME=/usr/local/tomcat
 ENV SPARK_HOME=/usr/local/spark
 ENV HUE_HOME=/usr/local/hue
+ENV HIVE_CONF_DIR=$HIVE_HOME/conf/
 
 ENV PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_INSTALL/sbin:$HIVE_HOME/bin:$SPARK_HOME/bin:$PATH
 ENV CLASSPATH=$HADOOP_HOME/lib/*:HIVE_HOME/lib/*:.
@@ -113,6 +106,7 @@ ADD hadoop-env.sh $HADOOP_CONF_DIR/hadoop-env.sh
 ADD hdfs-site.xml $HADOOP_CONF_DIR/hdfs-site.xml
 ADD mapred-site.xml $HADOOP_CONF_DIR/mapred-site.xml
 ADD yarn-site.xml $HADOOP_CONF_DIR/yarn-site.xml
+ADD yarn-env.sh $HADOOP_CONF_DIR/yarn-env.sh
 
 # format HFS
 RUN $HADOOP_HOME/bin/hdfs namenode -format -nonInteractive
@@ -125,7 +119,7 @@ ADD hive-site.xml $HIVE_HOME/conf/hive-site.xml
 
 ################################################################################
 # install spark
-RUN curl -s http://www.gtlib.gatech.edu/pub/apache/spark/spark-2.3.3/spark-2.3.3-bin-hadoop2.7.tgz | tar -xz -C /usr/local
+RUN curl -s https://archive.apache.org/dist/spark/spark-2.3.3/spark-2.3.3-bin-hadoop2.7.tgz | tar -xz -C /usr/local
 RUN mv /usr/local/spark-2.3.3-bin-hadoop2.7 $SPARK_HOME
 
 # config spark to read hive tables
@@ -143,6 +137,28 @@ RUN make apps
 RUN rm -f $HUE_HOME/desktop/conf/hue.ini
 ADD hue.ini $HUE_HOME/desktop/conf
 
+
+################################################################################
+# install tez
+RUN mkdir $TEZ_HOME
+RUN curl -L https://www.apache.org/dist/tez/0.8.5/apache-tez-0.8.5-bin.tar.gz | tar -zx -C $TEZ_HOME --strip-components 1
+RUN mkdir -p /tmp/tez && \
+  tar -xzvf $TEZ_HOME/share/tez.tar.gz -C /tmp/tez && \
+  cp $HIVE_HOME/lib/hive-hcatalog-core*.jar /tmp/tez/lib/ && \
+  cp $HIVE_HOME/lib/hive-hcatalog-server-extensions*.jar /tmp/tez/lib/ && \
+  cp $HIVE_HOME/lib/hive-exec*.jar /tmp/tez/lib/ && \
+  cd /tmp/tez && \
+  tar -czvf /tmp/tez.tar.gz . && \
+  mv /tmp/tez.tar.gz $TEZ_HOME/share/tez.tar.gz
+
+RUN mkdir $CATALINA_HOME
+RUN curl -L 'https://www.apache.org/dist/tomcat/tomcat-8/v8.5.47/bin/apache-tomcat-8.5.47.tar.gz' | tar -zx -C $CATALINA_HOME --strip-components 1
+RUN mkdir -p $CATALINA_HOME/webapps/tez-ui && \
+  cp $TEZ_HOME/tez-ui-0.8.5.war $CATALINA_HOME/webapps/tez-ui && \
+  cd $CATALINA_HOME/webapps/tez-ui && \
+  unzip tez-ui-0.8.5.war && \
+  rm tez-ui-0.8.5.war
+
 ################################################################################
 # add mysql jdbc driver
 RUN wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.15.tar.gz
@@ -153,7 +169,8 @@ RUN rm -rf mysql-connector-java-8.0.15 mysql-connector-java-8.0.15.tar.gz
 
 ################################################################################
 # add users and groups
-RUN groupadd hdfs && groupadd hadoop && groupadd hive && groupadd mapred && groupadd spark
+RUN groupadd hdfs && groupadd hadoop && groupadd hive && groupadd mapred && groupadd spark && groupadd tez
+RUN useradd -g tez tez
 RUN useradd -g hadoop hdpu && echo "hdpu:hdpu123" | chpasswd && adduser hdpu sudo
 RUN usermod -s /bin/bash hdpu
 
@@ -162,12 +179,14 @@ RUN usermod -a -G hadoop hdpu
 RUN usermod -a -G hive hdpu
 RUN usermod -a -G mapred hdpu
 RUN usermod -a -G spark hdpu
+RUN usermod -a -G tez hdpu
 
 RUN mkdir /home/hdpu
 RUN chown -R hdpu:hadoop /home/hdpu
 RUN echo "source /home/hdpu/.bashrc" > /home/hdpu/.profile
 ADD bashrc /home/hdpu/.bashrc
 RUN chown hdpu:hadoop /home/hdpu/.bashrc /home/hdpu/.profile
+ADD tez-site.xml /etc/tez/conf/tez-site.xml
 
 ################################################################################
 # expose port
@@ -192,6 +211,11 @@ EXPOSE 8888
 # SSH
 EXPOSE 22
 
+# Timeline Server
+EXPOSE 8188
+
+# Tomcat
+EXPOSE 8080
 ################################################################################
 # create startup script and set ENTRYPOINT
 WORKDIR /

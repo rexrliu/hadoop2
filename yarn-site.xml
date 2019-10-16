@@ -13,4 +13,56 @@
     <name>yarn.nodemanager.vmem-check-enabled</name>
     <value>false</value>
   </property>
+
+  <property>
+    <description>The hostname of the timeline server web application.</description>
+    <name>yarn.timeline-service.hostname</name>
+    <value>localhost</value>
+  </property>
+
+  <property>
+    <name>yarn.timeline-service.bind-host</name>
+    <value>0.0.0.0</value>
+  </property>
+
+  <property>
+    <description>Enable or disable the Timeline Server.</description>
+    <name>yarn.timeline-service.enabled</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>yarn.timeline-service.webapp.address</name>
+    <value>localhost:8188</value>
+  </property>
+
+  <property>
+    <name>yarn.timeline-service.http-authentication.type</name>
+    <value>simple</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.hostname</name>
+    <value>localhost</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.bind-host</name>
+    <value>0.0.0.0</value>
+  </property>
+
+  <property>
+    <description>Enables cross-origin support (CORS) for web services where
+    cross-origin web response headers are needed. For example, javascript making
+    a web services request to the timeline server.</description>
+    <name>yarn.timeline-service.http-cross-origin.enabled</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <description>Publish YARN information to Timeline Server</description>
+    <name> yarn.resourcemanager.system-metrics-publisher.enabled</name>
+    <value>true</value>
+  </property>
+
 </configuration>

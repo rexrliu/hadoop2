@@ -43,4 +43,9 @@
      <description>location of default database for the warehouse</description>
   </property>
 
+  <property>
+    <name>hive.execution.engine</name>
+    <value>tez</value>
+  </property>
+
 </configuration>

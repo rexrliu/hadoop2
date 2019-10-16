@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 # start ssh
 service ssh start
 ssh-keyscan localhost > /root/.ssh/known_hosts
@@ -7,9 +7,13 @@ ssh-keyscan 0.0.0.0 >> /root/.ssh/known_hosts
 
 # start hadoop
 $HADOOP_HOME/sbin/start-all.sh
+$HADOOP_HOME/sbin/yarn-daemon.sh start timelineserver
 
 $HADOOP_HOME/bin/hdfs dfs -mkdir /tmp
 $HADOOP_HOME/bin/hdfs dfs -chmod 1777 /tmp
+$HADOOP_HOME/bin/hdfs dfs -mkdir -p /app/tez
+$HADOOP_HOME/bin/hdfs dfs -chown -R tez:tez /app/tez
+$HADOOP_HOME/bin/hdfs dfs -put $TEZ_HOME/share/tez.tar.gz /app/tez
 $HADOOP_HOME/bin/hdfs dfs -mkdir -p /user/hive/warehouse
 $HADOOP_HOME/bin/hdfs dfs -chown -R hive:hive /user/hive
 $HADOOP_HOME/bin/hdfs dfs -chmod -R 775 /user/hive
@@ -35,6 +39,8 @@ echo """
   FLUSH PRIVILEGES;
   CREATE DATABASE hive;
 """ | mysql --user=root --password=$MYSQL_PWD
+#start tomcat
+$CATALINA_HOME/bin/startup.sh > /dev/null 2>&1 &
 
 # start hive
 $HIVE_HOME/bin/schematool -initSchema -dbType mysql

@@ -24,7 +24,7 @@
 # The java implementation to use.
 # export JAVA_HOME=/usr/
 # export JAVA_HOME=${JAVA_HOME}
-export JAVA_HOME=/usr/lib/jvm/default-java
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
 # The jsvc implementation to use. Jsvc is required to run secure datanodes
 # that bind to privileged ports to provide authentication of data transfer
@@ -100,3 +100,6 @@ export HADOOP_SECURE_DN_PID_DIR=${HADOOP_PID_DIR}
 
 # A string representing this instance of hadoop. $USER by default.
 export HADOOP_IDENT_STRING=$USER
+export TEZ_CONF_DIR=/etc/tez/conf
+export TEZ_JARS=$TEZ_HOME
+export HADOOP_CLASSPATH=${TEZ_CONF_DIR}:${TEZ_JARS}/*:${TEZ_JARS}/lib/*:$HADOOP_CLASSPATH
