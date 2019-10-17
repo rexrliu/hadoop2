@@ -119,14 +119,15 @@ RUN curl -s https://archive.apache.org/dist/spark/spark-2.3.3/spark-2.3.3-bin-ha
 RUN mv /usr/local/spark-2.3.3-bin-hadoop2.7 $SPARK_HOME
 
 # config spark to read hive tables
-RUN ln -s $HADOOP_HOME/etc/hadoop/core-site.xml $SPARK_HOME/conf/core-site.xml
-RUN ln -s $HADOOP_HOME/etc/hadoop/hdfs-site.xml $SPARK_HOME/conf/hdfs-site.xml
-RUN ln -s $HIVE_HOME/conf/hive-site.xml $SPARK_HOME/conf/hive-site.xml
+RUN ln -s $HADOOP_HOME/etc/hadoop/core-site.xml $SPARK_HOME/conf/
+RUN ln -s $HADOOP_HOME/etc/hadoop/hdfs-site.xml $SPARK_HOME/conf/
+RUN ln -s $HIVE_HOME/conf/hive-site.xml $SPARK_HOME/conf/
 
 # config hive on spark
-RUN ln -s $SPARK_HOME/jars/scala-library-*.jar $HIVE_HOME/lib/scala-library.jar
-RUN ln -s $SPARK_HOME/jars/spark-core_*.jar $HIVE_HOME/lib/spark-core.jar
-RUN ln -s $SPARK_HOME/jars/spark-network-common_*.jar $HIVE_HOME/lib/spark-network-common.jar
+RUN ln -s $SPARK_HOME/jars/scala-library*.jar $HIVE_HOME/lib/
+RUN ln -s $SPARK_HOME/jars/spark-core*.jar $HIVE_HOME/lib/
+RUN ln -s $SPARK_HOME/jars/spark-network-common*.jar $HIVE_HOME/lib/
+RUN ln -s $SPARK_HOME/jars/spark-unsafe*.jar $HIVE_HOME/lib/
 
 ################################################################################
 # install hue
@@ -183,6 +184,9 @@ EXPOSE 10000
 
 # Hue WebUI
 EXPOSE 8888
+
+# Spark WebUI
+EXPOSE 7180
 
 # SSH
 EXPOSE 22
