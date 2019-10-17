@@ -90,7 +90,7 @@
 
   <property>
     <name>spark.driver.memory</name>
-    <value>4g</value>
+    <value>1g</value>
   </property>
 
   <property>
