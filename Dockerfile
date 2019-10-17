@@ -114,7 +114,7 @@ RUN $HADOOP_HOME/bin/hdfs namenode -format -nonInteractive
 RUN mkdir $HIVE_HOME
 RUN curl -s https://archive.apache.org/dist/hive/hive-2.3.4/apache-hive-2.3.4-bin.tar.gz | tar -xz -C $HIVE_HOME --strip-components 1
 ADD hive-site.xml $HIVE_HOME/conf/hive-site.xml
-ADD hive-env.sh $HIVE_HOME/conf/hive-env.sh
+# ADD hive-env.sh $HIVE_HOME/conf/hive-env.sh
 
 ################################################################################
 # install spark
