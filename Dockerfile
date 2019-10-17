@@ -4,8 +4,7 @@ LABEL maintainer="rexrliu@gmail.com"
 WORKDIR /
 ################################################################################
 # update and install basic tools
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install --fix-missing -yq \
+RUN apt-get update && apt-get upgrade -y && apt-get install --fix-missing -yq \
   git \
   ant \
   gcc \
@@ -32,6 +31,7 @@ RUN apt-get install --fix-missing -yq \
   vim \
   openssh-server \
   wget \
+  openjdk-8-jdk \
   sudo
 
 ################################################################################
@@ -39,8 +39,7 @@ RUN apt-get install --fix-missing -yq \
 ENV MYSQL_PWD=Pwd123
 RUN echo "mysql-server mysql-server/root_password password $MYSQL_PWD" | debconf-set-selections
 RUN echo "mysql-server mysql-server/root_password_again password $MYSQL_PWD" | debconf-set-selections
-# RUN apt-get update && apt-get upgrade -y
-RUN apt-get -y install mysql-server
+RUN apt-get install -y mysql-server
 
 RUN chown -R mysql:mysql /var/lib/mysql
 RUN usermod -d /var/lib/mysql/ mysql
@@ -51,17 +50,8 @@ RUN mkdir /root/.ssh
 RUN cat /dev/zero | ssh-keygen -q -N "" > /dev/null && cat /root/.ssh/id_rsa.pub > /root/.ssh/authorized_keys
 
 ################################################################################
-# install java
-RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-  add-apt-repository -y ppa:webupd8team/java && \
-  apt-get update && \
-  apt-get install -y oracle-java8-installer && \
-  rm -rf /var/lib/apt/lists/* && \
-  rm -rf /var/cache/oracle-jdk8-installer
-
-################################################################################
 # set environment variables
-ENV JAVA_HOME=/usr/lib/jvm/java-8-oracle
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ENV HADOOP_HEAPSIZE=8192
 ENV HADOOP_HOME=/usr/local/hadoop
 ENV HADOOP_INSTALL=$HADOOP_HOME
@@ -125,13 +115,19 @@ ADD hive-site.xml $HIVE_HOME/conf/hive-site.xml
 
 ################################################################################
 # install spark
-RUN curl -s http://www.gtlib.gatech.edu/pub/apache/spark/spark-2.3.3/spark-2.3.3-bin-hadoop2.7.tgz | tar -xz -C /usr/local
+RUN curl -s https://archive.apache.org/dist/spark/spark-2.3.3/spark-2.3.3-bin-hadoop2.7.tgz | tar -xz -C /usr/local
 RUN mv /usr/local/spark-2.3.3-bin-hadoop2.7 $SPARK_HOME
 
 # config spark to read hive tables
-RUN ln -s $HADOOP_HOME/etc/hadoop/core-site.xml $SPARK_HOME/conf/core-site.xml
-RUN ln -s $HADOOP_HOME/etc/hadoop/hdfs-site.xml $SPARK_HOME/conf/hdfs-site.xml
-RUN ln -s $HIVE_HOME/conf/hive-site.xml $SPARK_HOME/conf/hive-site.xml
+RUN ln -s $HADOOP_HOME/etc/hadoop/core-site.xml $SPARK_HOME/conf/
+RUN ln -s $HADOOP_HOME/etc/hadoop/hdfs-site.xml $SPARK_HOME/conf/
+RUN ln -s $HIVE_HOME/conf/hive-site.xml $SPARK_HOME/conf/
+
+# config hive on spark
+RUN ln -s $SPARK_HOME/jars/scala-library*.jar $HIVE_HOME/lib/
+RUN ln -s $SPARK_HOME/jars/spark-core*.jar $HIVE_HOME/lib/
+RUN ln -s $SPARK_HOME/jars/spark-network-common*.jar $HIVE_HOME/lib/
+RUN ln -s $SPARK_HOME/jars/spark-unsafe*.jar $HIVE_HOME/lib/
 
 ################################################################################
 # install hue
@@ -188,6 +184,9 @@ EXPOSE 10000
 
 # Hue WebUI
 EXPOSE 8888
+
+# Spark WebUI
+EXPOSE 7180
 
 # SSH
 EXPOSE 22
