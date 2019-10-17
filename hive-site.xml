@@ -68,4 +68,5 @@
     <name>spark.yarn.jars</name>
     <value>hdfs://localhost:9000/spark-jars/*</value>
   </property>
+
 </configuration>
