@@ -1,0 +1,8 @@
+<configuration>
+
+  <property>
+    <name>tez.lib.uris</name>
+    <value>hdfs://localhost:9000/app/tez/tez.tar.gz</value>
+  </property>
+
+</configuration>

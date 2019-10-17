@@ -21,6 +21,10 @@ $HADOOP_HOME/bin/hdfs dfs -chmod -R 777 /user/hive/tmp
 $HADOOP_HOME/bin/hdfs dfs -mkdir /spark-jars
 $HADOOP_HOME/bin/hdfs dfs -put $SPARK_HOME/jars/* /spark-jars
 $HADOOP_HOME/bin/hdfs dfs -rm /spark-jars/*hive*1.2.1*
+$HADOOP_HOME/bin/hdfs dfs -mkdir -p /app/tez
+$HADOOP_HOME/bin/hdfs dfs -put $TEZ_HOME/share/tez.tar.gz /app/tez
+$HADOOP_HOME/bin/hdfs dfs -chown -R hdpu:tez /app/tez
+
 
 # start mysql and create databases/users for hue and hive
 chown -R mysql:mysql /var/lib/mysql

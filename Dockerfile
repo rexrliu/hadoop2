@@ -63,6 +63,7 @@ ENV YARN_HOME=$HADOOP_INSTALL
 ENV HIVE_HOME=/usr/local/hive
 ENV SPARK_HOME=/usr/local/spark
 ENV HUE_HOME=/usr/local/hue
+ENV TEZ_HOME=/usr/local/tez
 
 ENV PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_INSTALL/sbin:$HIVE_HOME/bin:$SPARK_HOME/bin:$PATH
 ENV CLASSPATH=$HADOOP_HOME/lib/*:HIVE_HOME/lib/*:.
@@ -82,6 +83,7 @@ RUN echo "YARN_HOME=$YARN_HOME" >> /etc/environment
 RUN echo "HIVE_HOME=$HIVE_HOME" >> /etc/environment
 RUN echo "SPARK_HOME=$SPARK_HOME" >> /etc/environment
 RUN echo "HUE_HOME=$HUE_HOME" >> /etc/environment
+RUN echo "TEZ_HOME=$TEZ_HOME" >> /etc/environment
 RUN echo "PATH=$PATH" >> /etc/environment
 RUN echo "CLASSPATH=$CLASSPATH" >> /etc/environment
 RUN echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> /etc/environment
@@ -112,6 +114,7 @@ RUN $HADOOP_HOME/bin/hdfs namenode -format -nonInteractive
 RUN mkdir $HIVE_HOME
 RUN curl -s https://archive.apache.org/dist/hive/hive-2.3.4/apache-hive-2.3.4-bin.tar.gz | tar -xz -C $HIVE_HOME --strip-components 1
 ADD hive-site.xml $HIVE_HOME/conf/hive-site.xml
+# ADD hive-env.sh $HIVE_HOME/conf/hive-env.sh
 
 ################################################################################
 # install spark
@@ -128,6 +131,13 @@ RUN ln -s $SPARK_HOME/jars/scala-library*.jar $HIVE_HOME/lib/
 RUN ln -s $SPARK_HOME/jars/spark-core*.jar $HIVE_HOME/lib/
 RUN ln -s $SPARK_HOME/jars/spark-network-common*.jar $HIVE_HOME/lib/
 RUN ln -s $SPARK_HOME/jars/spark-unsafe*.jar $HIVE_HOME/lib/
+
+################################################################################
+# install tez
+RUN mkdir $TEZ_HOME
+RUN curl -s https://www.apache.org/dist/tez/0.9.1/apache-tez-0.9.1-bin.tar.gz | tar -zx -C $TEZ_HOME --strip-components 1
+# RUN cp $TEZ_HOME/*.jar $HIVE_HOME/lib/
+ADD tez-site.xml $TEZ_HOME/conf/tez-site.xml
 
 ################################################################################
 # install hue
@@ -149,7 +159,8 @@ RUN rm -rf mysql-connector-java-8.0.15 mysql-connector-java-8.0.15.tar.gz
 
 ################################################################################
 # add users and groups
-RUN groupadd hdfs && groupadd hadoop && groupadd hive && groupadd mapred && groupadd spark
+RUN groupadd hdfs && groupadd hadoop && groupadd hive && groupadd mapred && groupadd spark && groupadd tez
+
 RUN useradd -g hadoop hdpu && echo "hdpu:hdpu123" | chpasswd && adduser hdpu sudo
 RUN usermod -s /bin/bash hdpu
 
@@ -158,6 +169,8 @@ RUN usermod -a -G hadoop hdpu
 RUN usermod -a -G hive hdpu
 RUN usermod -a -G mapred hdpu
 RUN usermod -a -G spark hdpu
+RUN usermod -a -G tez hdpu
+
 
 RUN mkdir /home/hdpu
 RUN chown -R hdpu:hadoop /home/hdpu
