@@ -50,6 +50,11 @@ $HIVE_HOME/bin/schematool -initSchema -dbType mysql
 $HIVE_HOME/bin/hive --service hiveserver2 > /dev/null 2>&1 &
 $HIVE_HOME/bin/hive --service metastore > /dev/null 2>&1 &
 
+# start impala
+service impala-state-store start
+service impala-catalog start
+service impala-server start
+
 # start hue
 $HUE_HOME/build/env/bin/hue syncdb --noinput
 $HUE_HOME/build/env/bin/hue migrate

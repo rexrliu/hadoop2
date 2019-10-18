@@ -64,6 +64,7 @@ ENV HIVE_HOME=/usr/local/hive
 ENV SPARK_HOME=/usr/local/spark
 ENV HUE_HOME=/usr/local/hue
 ENV TEZ_HOME=/usr/local/tez
+ENV IMPALA_HOME=/usr/local/impala
 
 ENV PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_INSTALL/sbin:$HIVE_HOME/bin:$SPARK_HOME/bin:$PATH
 ENV CLASSPATH=$HADOOP_HOME/lib/*:HIVE_HOME/lib/*:.
@@ -84,6 +85,7 @@ RUN echo "HIVE_HOME=$HIVE_HOME" >> /etc/environment
 RUN echo "SPARK_HOME=$SPARK_HOME" >> /etc/environment
 RUN echo "HUE_HOME=$HUE_HOME" >> /etc/environment
 RUN echo "TEZ_HOME=$TEZ_HOME" >> /etc/environment
+RUN echo "IMPALA_HOME=$IMPALA_HOME" >> /etc/environment
 RUN echo "PATH=$PATH" >> /etc/environment
 RUN echo "CLASSPATH=$CLASSPATH" >> /etc/environment
 RUN echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> /etc/environment
@@ -115,6 +117,12 @@ RUN mkdir $HIVE_HOME
 RUN curl -s https://archive.apache.org/dist/hive/hive-2.3.4/apache-hive-2.3.4-bin.tar.gz | tar -xz -C $HIVE_HOME --strip-components 1
 ADD hive-site.xml $HIVE_HOME/conf/hive-site.xml
 # ADD hive-env.sh $HIVE_HOME/conf/hive-env.sh
+
+################################################################################
+# install impala
+RUN wget -O /etc/apt/sources.list.d/cloudera.list http://archive.cloudera.com/impala/ubuntu/precise/amd64/impala/cloudera.list
+RUN apt-get update && apt-get install --allow-unauthenticated -y impala-server impala impala-state-store impala-catalog
+ADD impala /etc/default
 
 ################################################################################
 # install spark
@@ -159,9 +167,10 @@ RUN rm -rf mysql-connector-java-8.0.15 mysql-connector-java-8.0.15.tar.gz
 
 ################################################################################
 # add users and groups
-RUN groupadd hdfs && groupadd hadoop && groupadd hive && groupadd mapred && groupadd spark && groupadd tez
+RUN groupadd hadoop && groupadd mapred && groupadd spark && groupadd tez
 
 RUN useradd -g hadoop hdpu && echo "hdpu:hdpu123" | chpasswd && adduser hdpu sudo
+RUN useradd -g hdfs hdfs
 RUN usermod -s /bin/bash hdpu
 
 RUN usermod -a -G hdfs hdpu
@@ -170,6 +179,9 @@ RUN usermod -a -G hive hdpu
 RUN usermod -a -G mapred hdpu
 RUN usermod -a -G spark hdpu
 RUN usermod -a -G tez hdpu
+RUN usermod -a -G impala hdpu
+RUN usermod -a -G hadoop impala
+RUN usermod -a -G hdfs impala
 
 
 RUN mkdir /home/hdpu
@@ -177,6 +189,9 @@ RUN chown -R hdpu:hadoop /home/hdpu
 RUN echo "source /home/hdpu/.bashrc" > /home/hdpu/.profile
 ADD bashrc /home/hdpu/.bashrc
 RUN chown hdpu:hadoop /home/hdpu/.bashrc /home/hdpu/.profile
+
+RUN mkdir -p /var/run/hdfs-sockets && chown -R hdfs:hdfs /var/run/hdfs-sockets
+RUN mkdir -p /data/log/impala && chown -R impala:impala /data/log/impala
 
 ################################################################################
 # expose port
@@ -200,6 +215,9 @@ EXPOSE 8888
 
 # Spark WebUI
 EXPOSE 7180
+
+# Impala
+EXPOSE 21050
 
 # SSH
 EXPOSE 22
