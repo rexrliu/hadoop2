@@ -119,12 +119,6 @@ ADD hive-site.xml $HIVE_HOME/conf/hive-site.xml
 # ADD hive-env.sh $HIVE_HOME/conf/hive-env.sh
 
 ################################################################################
-# install impala
-RUN wget -O /etc/apt/sources.list.d/cloudera.list http://archive.cloudera.com/impala/ubuntu/precise/amd64/impala/cloudera.list
-RUN apt-get update && apt-get install --allow-unauthenticated -y impala-server impala impala-state-store impala-catalog
-ADD impala /etc/default
-
-################################################################################
 # install spark
 RUN curl -s https://archive.apache.org/dist/spark/spark-2.3.3/spark-2.3.3-bin-hadoop2.7.tgz | tar -xz -C /usr/local
 RUN mv /usr/local/spark-2.3.3-bin-hadoop2.7 $SPARK_HOME
@@ -156,6 +150,16 @@ RUN make apps
 
 RUN rm -f $HUE_HOME/desktop/conf/hue.ini
 ADD hue.ini $HUE_HOME/desktop/conf
+
+################################################################################
+# install impala
+RUN wget -O /etc/apt/sources.list.d/cloudera.list http://archive.cloudera.com/impala/ubuntu/precise/amd64/impala/cloudera.list
+RUN apt-get update && apt-get install --allow-unauthenticated -y impala-server impala impala-state-store impala-catalog
+
+ADD hive-site.xml /etc/impala/conf
+ADD core-site.xml /etc/impala/conf
+ADD impala-site.xml /etc/impala/conf/hdfs-site.xml
+ADD impala /etc/default
 
 ################################################################################
 # add mysql jdbc driver
