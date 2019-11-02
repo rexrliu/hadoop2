@@ -1,5 +1,5 @@
 # hadoop2
-This Dockerfile is for the installation of Hadoop2, Hive2, Spark2, and Hue4 in one container.
+Build docker image that includes Hadoop2, Hive2, Spark2, Tez0.9, and Hue4
 
 
 Build Image
@@ -16,5 +16,9 @@ ssh -p 8022 hdpu@localhost (password: hdpu123, this is a sudo user)
 
 Features
 =============
-Hue file browser and table browser are enabled
-Spark access to Hive tables is configured
+* Both file and table browsers are enabled on Hue
+* Spark access to Hive tables is enable
+* Multiple Hive execution engines: MR (mapreduce), Spark, or Tez
+* The default Derby database for Hive metastore and SQLite for Hue are replaced
+with MySQL (more robust and similar to real production environments)
+* Common aliases of Hadoop commands are provided

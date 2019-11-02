@@ -180,29 +180,7 @@ RUN chown hdpu:hadoop /home/hdpu/.bashrc /home/hdpu/.profile
 
 ################################################################################
 # expose port
-# Hadoop Resource Manager
-EXPOSE 8088
-
-# Hadoop NameNode
-EXPOSE 50070
-
-# Hadoop DataNode
-EXPOSE 50075
-
-# Hive WebUI
-EXPOSE 10002
-
-# Hive Master
-EXPOSE 10000
-
-# Hue WebUI
-EXPOSE 8888
-
-# Spark WebUI
-EXPOSE 7180
-
-# SSH
-EXPOSE 22
+EXPOSE 8088 50070 50075 10002 10000 8888 7180 22
 
 ################################################################################
 # create startup script and set ENTRYPOINT
